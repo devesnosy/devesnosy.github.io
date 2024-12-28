@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thoughts on Language Models</title>
+</head>
+<body>
+    <h1>Thoughts on Language Models</h1>
+    <h2>Abstract</h2>
+    <p>Thoughts on creating a language model from first principles</p>
+    <h2>Introduction</h2>
+    <p>
+        Let's focus on generating English text,
+        we have the set of latin English characters: a to z,<br>
+        let's assign a weight for each character,
+        at the beginning, all characters have same weight,<br>
+        even when our text starts with a specific letter,<br>
+        that doesn't change the weights, so sampling letters at random,<br>
+        we get random strings of characters, and no meaningful words.
+    </p>
+    <h2>Data</h2>
+    <p>
+        Let's assume out dataset is just a set of some English words,<br>
+        with equal weights assigned to them initially,<br>
+        that way, when our text starts with a specific letter,<br>
+        all words that do not start with letter have their weight modified to be zero by the model,<br>
+        <br>
+        so only words that start with that letter will be picked,<br>
+        but why pick the entire word?<br>
+        we can just pick the next letter from that word,<br>
+        this will either be redundant,<br>
+        or it will increase our control of the model output, since every time we pick a letter,
+        we could update the weights, and that will change the final predicted word,<br>
+        but in the end it will be an existing word in the dataset,<br>
+        so far it sounds like we are building a keyboard autocomplete program,<br>
+        <br>
+        in any case, thinking more about that picking on a letter level idea, indeed it sounds great as a feature,<br>
+        where you can pause generation in the middle of a word,<br>
+        but yeah could be more than that, or not, needs to be tested.
+    </p>
+    TODO
+</body>
+</html>
