@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level-order traversal in Zig</title>
+
+    <link rel="stylesheet" href="highlightjs-dracula.css">
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/default.min.css"> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script>hljs.highlightAll();</script>
+    <style>
+        /* Dark mode and collapsable by W3 Schools */
+        .dark-mode {
+            background-color: black;
+            color: white;
+        }
+
+        .collapsible {
+            background-color: #777;
+            color: white;
+            cursor: pointer;
+            padding: 18px;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .active,
+        .collapsible:hover {
+            background-color: #555;
+        }
+
+        .content {
+            padding: 0 18px;
+            display: none;
+            overflow: hidden;
+            background-color: black;
+        }
+
+        .button {
+            background-color: #04AA6D;
+            /* Green */
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body class="dark-mode">
+    <p>This image was posted by <a href="https://x.com/vikhyatk">@vikhyatk</a> on X.com (Twitter previously): <a
+            href="https://x.com/doodlestein/status/1873059141427867714">Link</a></p>
+    <img src="level_order.webp" />
+    <p>Here's my solution in the <a href="https://ziglang.org/">Zig programming language</a>:</p>
+    <button type="button" class="collapsible">Open Collapsible</button>
+    <div class="content">
+
+        <pre><code class="language-rust">const std = @import("std");
+const GPA = std.heap.GeneralPurposeAllocator(.{});
+
+const BTree_Node = struct {
+    value: usize,
+    left: ?*BTree_Node,
+    right: ?*BTree_Node,
+};
+
+pub fn create_btree_node(ator: std.mem.Allocator, value: usize) !*BTree_Node {
+    var node = try ator.create(BTree_Node);
+    node.value = value;
+    node.left = null;
+    node.right = null;
+    return node;
+}
+
+pub fn FIFO_Queue(comptime T: type) type {
+    return struct {
+        const Self = @This();
+        const LType = std.DoublyLinkedList(T);
+        const NType = LType.Node;
+
+        ator: std.mem.Allocator = undefined,
+        list: LType = .{},
+
+        pub fn init(ator: std.mem.Allocator) Self {
+            return .{ .ator = ator };
+        }
+        pub fn push(self: *Self, data: T) !void {
+            var new_node = try self.ator.create(NType);
+            new_node.data = data;
+            self.list.append(new_node);
+        }
+        pub fn pop(self: *Self) T {
+            const node = self.list.popFirst().?;
+            const data = node.data;
+            self.ator.destroy(node);
+            return data;
+        }
+        pub fn is_empty(self: *Self) bool {
+            return self.list.len == 0;
+        }
+        pub fn deinit(self: *Self) void {
+            while (self.list.len > 0) self.ator.destroy(self.list.pop().?);
+        }
+        pub fn get_len(self: *Self) usize {
+            return self.list.len;
+        }
+    };
+}
+
+pub fn main() !void {
+    var gpa = GPA.init;
+    defer {
+        const gpa_deinit_res = gpa.deinit();
+        std.debug.assert(gpa_deinit_res == .ok);
+    }
+    const ator = gpa.allocator();
+
+    var root = try create_btree_node(ator, 1);
+    root.left = try create_btree_node(ator, 2);
+    root.right = try create_btree_node(ator, 3);
+
+    root.left.?.left = try create_btree_node(ator, 4);
+    root.right.?.left = try create_btree_node(ator, 5);
+    root.right.?.right = try create_btree_node(ator, 6);
+
+    // Level order traversal
+    var queue = FIFO_Queue(*BTree_Node).init(ator);
+    defer queue.deinit();
+    try queue.push(root);
+    while (!queue.is_empty()) {
+        // Thanks to https://x.com/doodlestein 's AI code for the idea of using the length of queue
+        // to know when to print a new line
+        const level_size = queue.get_len();
+        for (0..level_size) |_| {
+            const node = queue.pop();
+            std.debug.print("{} ", .{node.value});
+            if (node.left) |left| try queue.push(left);
+            if (node.right) |right| try queue.push(right);
+        }
+        std.debug.print("\n", .{});
+    }
+
+    // Free tree
+    var stack = std.ArrayList(*BTree_Node).init(ator);
+    defer stack.deinit();
+    try stack.append(root);
+    while (stack.items.len > 0) {
+        const node = stack.pop();
+        if (node.left) |l| try stack.append(l);
+        if (node.right) |r| try stack.append(r);
+        ator.destroy(node);
+    }
+}</code></pre>
+
+    </div>
+
+    <h2>
+        I have been struggling hard financially and mentally, if you find my content useful please consider supporting
+        me directly via PayPal.me, thank you.
+    </h2>
+    <a href="https://paypal.me/esnosy" class="button">PayPal.me</a>
+
+    <script>
+        var coll = document.getElementsByClassName("collapsible");
+        var i;
+
+        for (i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function () {
+                this.classList.toggle("active");
+                var content = this.nextElementSibling;
+                if (content.style.display === "block") {
+                    content.style.display = "none";
+                } else {
+                    content.style.display = "block";
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>
