@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>
+            Fast Two-Pass Algorithm for Nearest Primitive (Point and Non-Point)
+        </title>
+        <!-- <title>Fast Two-Pass Algorithm For Finding Nearest Primitive In Axis-Aligned Bounding Box Binary Tree And
+        Implementation In The Zig Programming Language</title> -->
+    </head>
+
+    <body>
+        <!-- <h1 style="text-align: center;">Fast Two-Pass Algorithm For Finding Nearest Primitive In Axis-Aligned Bounding Box
+        Binary Tree And
+        Implementation In The Zig Programming Language</h1> -->
+        <h1 style="text-align: center">
+            Fast Two-Pass Algorithm for Nearest Primitive (Point and Non-Point)
+        </h1>
+        <h2 style="text-align: center">
+            Eyad Barany (student at
+            <a href="https://ci.tanta.edu.eg/en">FCI TU</a>)
+        </h2>
+        <p style="text-align: center">
+            <a href="mailto:dev.esnosy@gmail.com">dev.esnosy@gmail.com</a> |
+            <a href="https://x.com/dev_esnosy">X</a>
+        </p>
+        <h2>Definitions:</h2>
+        <ul>
+            <li><b>AABB</b>: Axis-Aligned Bounding Box</li>
+            <li><b>BVH</b>: Bounding Volume Hierarchy</li>
+            <li>
+                <b>Distance(point, AABB)</b>: Zero if point is inside AABB,
+                otherwise it is the distance to nearest point on AABB surface
+            </li>
+        </ul>
+        <h2>Inputs:</h2>
+        <ul>
+            <li><b>Q</b>: Query point</li>
+            <li><b>AABB_Tree</b>: BVH of AABBs of some set of primitives</li>
+        </ul>
+        <h2>Procedure:</h2>
+        <h3>First Pass (a greedy nearest primitive pass):</h3>
+        <ol>
+            <li>We traverse the tree only picking the closest AABB</li>
+            <li>
+                Once leaf node is reached, iterate its child primitives and
+                record the nearest one to the query point
+            </li>
+        </ol>
+        <h3>Second Pass (a "nearest primitive in range" pass):</h3>
+        <ol>
+            <li>
+                Traverse tree and discard AABBs that have distance greater than
+                distance to primitive found in first pass
+            </li>
+            <li>
+                Keep record of nearest primitive found in leaf nodes while
+                traversing
+            </li>
+            <li>
+                Nearest found primitive is the absolute nearest primitive to the
+                query point
+            </li>
+        </ol>
+        <h3>Why is a second pass needed?</h3>
+        <p>
+            First pass is not enough to find nearest primitive, picking nearest
+            AABB while traversing indeed is the best way to find true nearest
+            primitive,
+        </p>
+        <p>
+            but it only guarantees finding a possible nearest primitive, not the
+            true one, because when the nearest AABB is picked, we essentially
+            pick the AABB where the nearest possible primitive in that AABB is
+            closer than the other AABB,
+        </p>
+        <p>
+            but when we finally find the actual nearest primitive in the final
+            AABB tree leaf node, the only way for it to be the true nearest is
+            for it to have the same distance to the query point as that very
+            first distance to AABB in the very first traversal step, otherwise a
+            second pass is needed, so we do it every time anyways, a "nearest
+            primitive in range" query, where the range is the distance found in
+            first pass,
+        </p>
+        <p>
+            we of course do not have to check primitives that are further away
+            from query point than the primitive found in first pass (that's why
+            we discard AABBs that have distance greater than distance to
+            primitive found in first pass), because by definition, nearest
+            primitive is closer than any other primitive in the set, so for
+            every primitive in set, the nearest primitive has to be either
+            closer or equal in distance than it, this an obvious but subtle fact
+            worth mentioning if we ever wanted to prove the algorithm formally.
+        </p>
+
+        <h2>Implementation:</h2>
+        TBD
+    </body>
+</html>
