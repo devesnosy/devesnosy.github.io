@@ -79,10 +79,11 @@
             but when we finally find the actual nearest primitive in the final
             AABB tree leaf node, the only way for it to be the true nearest is
             for it to have the same distance to the query point as that very
-            first distance to AABB in the very first traversal step, otherwise a
-            second pass is needed, so we do it every time anyways, a "nearest
-            primitive in range" query, where the range is the distance found in
-            first pass,
+            first distance to AABB in the very first traversal step, if distance
+            is greater than that very first distance, or if that very first
+            distance was zero, a second pass is needed, so we do it every time
+            anyways, a "nearest primitive in range" query, where the range is
+            the distance found in first pass,
         </p>
         <p>
             we of course do not have to check primitives that are further away
